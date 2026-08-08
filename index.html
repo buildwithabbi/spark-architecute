@@ -1425,8 +1425,17 @@
         const ChevronDown = ({ className, ...props }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M6 9l6 6 6-6" /></svg>
         );
+        const ChevronLeft = ({ className, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M15 18l-6-6 6-6" /></svg>
+        );
         const ChevronRight = ({ className, ...props }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><path d="M9 18l6-6-6-6" /></svg>
+        );
+        const ArrowRight = ({ className, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+        );
+        const Workflow = ({ className, ...props }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><rect x="3" y="3" width="6" height="6" rx="1" /><rect x="15" y="3" width="6" height="6" rx="1" /><rect x="9" y="15" width="6" height="6" rx="1" /><path d="M6 9v3a1 1 0 0 0 1 1h5" /><path d="M18 9v3a1 1 0 0 1-1 1h-5" /><path d="M12 13v2" /></svg>
         );
         const Play = ({ className, ...props }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}><polygon points="5 3 19 12 5 21 5 3" /></svg>
@@ -2175,6 +2184,245 @@
         }];
 
         // ================================================================
+        // INTERACTIVE WORKFLOW VISUALIZER COMPONENT
+        // ================================================================
+        const WorkflowVisualizer = ({ workflowStr, nodeName }) => {
+            const [activeStep, setActiveStep] = useState(0);
+            const [isPlaying, setIsPlaying] = useState(false);
+
+            if (!workflowStr) return null;
+
+            const steps = useMemo(() => {
+                return workflowStr.split(/\s*->\s*/).filter(s => s.trim().length > 0);
+            }, [workflowStr]);
+
+            useEffect(() => {
+                let timer = null;
+                if (isPlaying && steps.length > 0) {
+                    timer = setInterval(() => {
+                        setActiveStep((prev) => (prev + 1) % steps.length);
+                    }, 3200);
+                }
+                return () => {
+                    if (timer) clearInterval(timer);
+                };
+            }, [isPlaying, steps.length]);
+
+            useEffect(() => {
+                setActiveStep(0);
+                setIsPlaying(false);
+            }, [workflowStr]);
+
+            if (steps.length === 0) return null;
+
+            const formatStepContent = (text) => {
+                const techTerms = [
+                    'spark-submit', 'Driver', 'SparkSession', 'SparkContext', 'Cluster Manager',
+                    'Executors', 'Executor', 'DAGScheduler', 'TaskScheduler', 'SchedulerBackend',
+                    'TaskSets', 'TaskSet', 'Task', 'Tasks', 'RDD', 'DataFrame', 'Catalyst',
+                    'ShuffleMapStage', 'ResultStage', 'ShuffleMapTask', 'ResultTask',
+                    'BlockManager', 'Tungsten', 'Netty', 'RPC', 'HashPartitioner',
+                    'SortMergeJoin', 'TaskCommitProtocol', 'Iterator', 'MemoryManager'
+                ];
+                const regex = new RegExp(`\\b(${techTerms.join('|')})\\b`, 'g');
+                const parts = text.split(regex);
+                return parts.map((part, i) => {
+                    if (techTerms.includes(part)) {
+                        return (
+                            <span key={i} className="font-mono font-semibold text-amber-300 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20 text-[11px] inline-block my-0.5">
+                                {part}
+                            </span>
+                        );
+                    }
+                    return part;
+                });
+            };
+
+            return (
+                <div className="bg-slate-950/90 border border-amber-500/30 rounded-2xl p-5 md:p-6 shadow-2xl space-y-5 relative overflow-hidden">
+                    <div className="absolute -top-24 -right-24 w-72 h-72 bg-amber-500/5 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-4">
+                        <div className="flex items-center space-x-3">
+                            <div className="p-2 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 text-amber-400">
+                                <Workflow className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                                        02. Internal Execution Flowchart
+                                    </span>
+                                    <span className="text-xs text-slate-400 font-mono hidden md:inline">
+                                        {steps.length} Sequential Execution Phases
+                                    </span>
+                                </div>
+                                <h3 className="text-base font-bold text-white mt-1 flex items-center gap-2">
+                                    Execution Workflow Sequence — {nodeName}
+                                </h3>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center space-x-2">
+                            <button
+                                onClick={() => setIsPlaying(!isPlaying)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition ${
+                                    isPlaying
+                                        ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40 hover:bg-rose-500/30'
+                                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                                }`}
+                            >
+                                {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                                <span>{isPlaying ? 'Pause Flow' : 'Auto Play Flow'}</span>
+                            </button>
+
+                            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-lg p-0.5">
+                                <button
+                                    onClick={() => {
+                                        setIsPlaying(false);
+                                        setActiveStep((prev) => (prev > 0 ? prev - 1 : steps.length - 1));
+                                    }}
+                                    className="p-1 text-slate-400 hover:text-slate-200 transition rounded"
+                                    title="Previous Step"
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </button>
+                                <span className="px-2 text-xs font-mono text-amber-400 font-bold">
+                                    {activeStep + 1}/{steps.length}
+                                </span>
+                                <button
+                                    onClick={() => {
+                                        setIsPlaying(false);
+                                        setActiveStep((prev) => (prev + 1) % steps.length);
+                                    }}
+                                    className="p-1 text-slate-400 hover:text-slate-200 transition rounded"
+                                    title="Next Step"
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden flex border border-slate-800">
+                        {steps.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => {
+                                    setIsPlaying(false);
+                                    setActiveStep(idx);
+                                }}
+                                style={{ width: `${100 / steps.length}%` }}
+                                className={`h-full transition-all duration-300 border-r border-slate-950 last:border-0 ${
+                                    idx === activeStep
+                                        ? 'bg-amber-400 shadow-glow'
+                                        : idx < activeStep
+                                        ? 'bg-amber-500/40'
+                                        : 'bg-slate-800'
+                                }`}
+                                title={`Jump to Step ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 relative">
+                        {steps.map((stepText, idx) => {
+                            const isActive = idx === activeStep;
+                            const isFirst = idx === 0;
+                            const isLast = idx === steps.length - 1;
+
+                            return (
+                                <div
+                                    key={idx}
+                                    onClick={() => {
+                                        setIsPlaying(false);
+                                        setActiveStep(idx);
+                                    }}
+                                    className={`group cursor-pointer rounded-xl p-4 border transition-all duration-300 relative flex flex-col justify-between ${
+                                        isActive
+                                            ? 'bg-gradient-to-br from-amber-500/15 via-slate-900 to-slate-950 border-amber-400 ring-1 ring-amber-400/50 shadow-xl shadow-amber-500/10 scale-[1.02]'
+                                            : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700 hover:bg-slate-800/50'
+                                    }`}
+                                >
+                                    <div>
+                                        <div className="flex items-center justify-between mb-2.5">
+                                            <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded border transition-colors ${
+                                                isActive
+                                                    ? 'bg-amber-400 text-slate-950 border-amber-300 shadow-sm'
+                                                    : 'bg-slate-800 text-amber-400 border-slate-700'
+                                            }`}>
+                                                PHASE 0{idx + 1}
+                                            </span>
+
+                                            {isFirst ? (
+                                                <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+                                                    <Play className="w-2.5 h-2.5" /> Start
+                                                </span>
+                                            ) : isLast ? (
+                                                <span className="text-[10px] font-mono text-purple-400 font-bold uppercase tracking-wider flex items-center gap-1 bg-purple-950/40 px-2 py-0.5 rounded border border-purple-500/30">
+                                                    <CheckCircle className="w-2.5 h-2.5" /> Finish
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] font-mono text-cyan-400 font-medium uppercase tracking-wider flex items-center gap-1">
+                                                    <Activity className="w-2.5 h-2.5" /> Exec
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="text-xs text-slate-200 leading-relaxed font-medium">
+                                            {formatStepContent(stepText.trim())}
+                                        </div>
+                                    </div>
+
+                                    {!isLast && (
+                                        <div className="mt-3 pt-2 border-t border-slate-800/60 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+                                            <span>Proceeds to 0{idx + 2}</span>
+                                            <ArrowRight className={`w-3.5 h-3.5 transition-transform ${
+                                                isActive ? 'text-amber-400 translate-x-1' : 'text-slate-600 group-hover:text-slate-400'
+                                            }`} />
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    <div className="bg-slate-900/90 border border-amber-500/40 rounded-xl p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 shadow-lg">
+                        <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-amber-500/20 text-amber-400 border border-amber-500/30 flex-shrink-0 mt-0.5 md:mt-0">
+                                <Info className="w-4 h-4" />
+                            </div>
+                            <div>
+                                <div className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-bold">
+                                    Active Phase Breakdown — Step {activeStep + 1} of {steps.length}
+                                </div>
+                                <p className="text-xs text-slate-200 font-medium mt-0.5 leading-relaxed">
+                                    {steps[activeStep].trim()}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0 self-end md:self-auto">
+                            <button
+                                onClick={() => setActiveStep((prev) => (prev > 0 ? prev - 1 : steps.length - 1))}
+                                disabled={activeStep === 0}
+                                className="px-3 py-1.5 rounded bg-slate-800 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-slate-300 flex items-center gap-1 border border-slate-700 transition"
+                            >
+                                <ChevronLeft className="w-3.5 h-3.5" /> Prev
+                            </button>
+                            <button
+                                onClick={() => setActiveStep((prev) => (prev + 1) % steps.length)}
+                                disabled={activeStep === steps.length - 1}
+                                className="px-3 py-1.5 rounded bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-semibold text-slate-950 flex items-center gap-1 shadow transition"
+                            >
+                                Next <ChevronRight className="w-3.5 h-3.5" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ================================================================
         // MAIN APP COMPONENT
         // ================================================================
         function App() {
@@ -2650,23 +2898,24 @@
                                             </div>
                                         </div>
 
+                                        {/* 01. Overview & Mental Model */}
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div className="md:col-span-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
                                                 <div>
                                                     <h4 className="text-xs uppercase font-mono tracking-wider text-amber-400 mb-1 flex items-center gap-1.5 font-bold">
-                                                        <Info className="w-3.5 h-3.5" /> 1. Academic Definition & Overview
+                                                        <Info className="w-3.5 h-3.5" /> 01. Academic Definition & Overview
                                                     </h4>
                                                     <p className="text-sm text-slate-200 leading-relaxed font-medium">{selectedNode.definition || selectedNode.overview}</p>
                                                 </div>
                                                 {selectedNode.simpleExplanation && (
                                                     <div className="pt-2 border-t border-slate-800/80">
-                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">2. Simple English Explanation</h5>
+                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">Simple English Explanation</h5>
                                                         <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.simpleExplanation}</p>
                                                     </div>
                                                 )}
                                                 {selectedNode.whyExists && (
                                                     <div className="pt-2 border-t border-slate-800/80">
-                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">3. Why It Exists</h5>
+                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">Why It Exists</h5>
                                                         <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.whyExists}</p>
                                                     </div>
                                                 )}
@@ -2674,125 +2923,165 @@
                                             <div className="bg-gradient-to-br from-slate-950 to-slate-900 p-4 rounded-xl border border-amber-500/20 space-y-3">
                                                 <div>
                                                     <h4 className="text-xs uppercase font-mono tracking-wider text-amber-400 mb-1 flex items-center gap-1.5 font-bold">
-                                                        <Zap className="w-3.5 h-3.5" /> 4. Real-World Mental Model
+                                                        <Zap className="w-3.5 h-3.5" /> Real-World Mental Model
                                                     </h4>
                                                     <p className="text-xs text-slate-300 italic leading-relaxed">{selectedNode.analogy}</p>
                                                 </div>
                                                 {selectedNode.industryUseCase && (
                                                     <div className="pt-2 border-t border-slate-800">
-                                                        <h5 className="text-[11px] font-mono text-emerald-400 font-bold uppercase mb-0.5">5. Real Industry Use Case</h5>
+                                                        <h5 className="text-[11px] font-mono text-emerald-400 font-bold uppercase mb-0.5">Real Industry Use Case</h5>
                                                         <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.industryUseCase}</p>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {(selectedNode.formula || selectedNode.numericalExample) && (
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-amber-500/30 font-mono text-xs">
-                                                {selectedNode.formula && (
-                                                    <div>
-                                                        <h4 className="text-amber-400 font-bold uppercase text-[11px] mb-1">7. Mathematical Formula / Calculation Rule</h4>
-                                                        <div className="text-slate-200 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
-                                                            {selectedNode.formula}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                                {selectedNode.numericalExample && (
-                                                    <div>
-                                                        <h4 className="text-amber-400 font-bold uppercase text-[11px] mb-1">8. Solved Numerical Example</h4>
-                                                        <div className="text-slate-300 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
-                                                            {selectedNode.numericalExample}
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        )}
+                                        {/* 02. Internal Execution Workflow (Full Width Featured Section) */}
+                                        <WorkflowVisualizer workflowStr={selectedNode.internalWorkflow} nodeName={selectedNode.name} />
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Core Responsibilities</h4>
-                                                <ul className="space-y-1.5 text-xs text-slate-300">
-                                                    {selectedNode.responsibilities.map((r, i) => (
-                                                        <li key={i} className="flex items-start gap-2">
-                                                            <span className="text-amber-400 font-bold">•</span>
-                                                            <span>{r}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                            <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">6. Internal Workflow</h4>
-                                                {renderWorkflow(selectedNode.internalWorkflow)}
-                                            </div>
-                                            <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Inputs & Outputs</h4>
-                                                <div className="space-y-2 text-xs">
-                                                    <div><span className="text-slate-500 font-mono">INPUT: </span><span className="text-slate-300">{selectedNode.inputs}</span></div>
-                                                    <div><span className="text-slate-500 font-mono">OUTPUT: </span><span className="text-slate-300">{selectedNode.outputs}</span></div>
-                                                </div>
-                                            </div>
-                                            <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Communication Protocols</h4>
-                                                {renderCommunication(selectedNode.communication)}
-                                            </div>
-                                            <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Thread & Memory Footprint</h4>
-                                                <div className="space-y-1.5 text-xs text-slate-300">
-                                                    <p><strong className="text-slate-400">Thread Model:</strong> {selectedNode.threadModel}</p>
-                                                    <p><strong className="text-slate-400">Memory Profile:</strong> {selectedNode.memoryUsage}</p>
-                                                </div>
-                                            </div>
-                                            <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Failure Recovery Protocol</h4>
-                                                <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.failureHandling}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                            <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-xl">
-                                                <h4 className="text-xs font-mono uppercase text-emerald-400 font-bold mb-1 flex items-center gap-1.5">
-                                                    <CheckCircle className="w-4 h-4" /> 12. Production Best Practice
-                                                </h4>
-                                                <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.productionBestPractices}</p>
-                                            </div>
-                                            <div className="bg-rose-950/20 border border-rose-500/30 p-4 rounded-xl">
-                                                <h4 className="text-xs font-mono uppercase text-rose-400 font-bold mb-1 flex items-center gap-1.5">
-                                                    <AlertTriangle className="w-4 h-4" /> 11 & 14. Common Anti-Pattern / Misconception
-                                                </h4>
-                                                <p className="text-xs text-slate-300 leading-relaxed">
-                                                    <span className="text-rose-300 font-medium">Mistake:</span> {selectedNode.commonMistakes}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {selectedNode.keyTakeaways && selectedNode.keyTakeaways.length > 0 && (
-                                            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold mb-2 flex items-center gap-1.5">
-                                                    <CheckCircle className="w-4 h-4" /> 15. Key Architectural Takeaways
-                                                </h4>
-                                                <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
-                                                    {selectedNode.keyTakeaways.map((kt, i) => (
-                                                        <li key={i} className="flex items-start gap-2 bg-slate-900 p-2.5 rounded border border-slate-800/80">
-                                                            <span className="text-amber-400 font-bold">•</span>
-                                                            <span>{kt}</span>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        )}
-
-                                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                                            <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold mb-2 flex items-center gap-1.5">
-                                                <HelpCircle className="w-4 h-4" /> 10. Targeted Interview Questions for {selectedNode.name}
+                                        {/* 03. Core Technical Specifications (6 Uniform Cards Grid) */}
+                                        <div className="space-y-3">
+                                            <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+                                                <Layers className="w-3.5 h-3.5" /> 03. Deep Architecture Specifications
                                             </h4>
-                                            <ul className="space-y-1 text-xs text-slate-300">
-                                                {selectedNode.interviewQuestions.map((q, i) => (
-                                                    <li key={i} className="flex items-start gap-2">
-                                                        <span className="text-amber-500 font-mono">Q{i+1}:</span>
-                                                        <span>{q}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
+                                                        <CheckCircle className="w-3 h-3 text-amber-400" /> Core Responsibilities
+                                                    </h5>
+                                                    <ul className="space-y-1.5 text-xs text-slate-300">
+                                                        {selectedNode.responsibilities.map((r, i) => (
+                                                            <li key={i} className="flex items-start gap-2">
+                                                                <span className="text-amber-400 font-bold">•</span>
+                                                                <span>{r}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
+                                                        <FileText className="w-3 h-3 text-amber-400" /> Inputs & Outputs
+                                                    </h5>
+                                                    <div className="space-y-2 text-xs">
+                                                        <div><span className="text-slate-500 font-mono">INPUT: </span><span className="text-slate-300">{selectedNode.inputs}</span></div>
+                                                        <div><span className="text-slate-500 font-mono">OUTPUT: </span><span className="text-slate-300">{selectedNode.outputs}</span></div>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
+                                                        <Activity className="w-3 h-3 text-amber-400" /> Communication Protocols
+                                                    </h5>
+                                                    {renderCommunication(selectedNode.communication)}
+                                                </div>
+                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
+                                                        <Cpu className="w-3 h-3 text-amber-400" /> Thread & Memory Footprint
+                                                    </h5>
+                                                    <div className="space-y-1.5 text-xs text-slate-300">
+                                                        <p><strong className="text-slate-400">Thread Model:</strong> {selectedNode.threadModel}</p>
+                                                        <p><strong className="text-slate-400">Memory Profile:</strong> {selectedNode.memoryUsage}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
+                                                        <ShieldAlert className="w-3 h-3 text-amber-400" /> Failure Recovery Protocol
+                                                    </h5>
+                                                    <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.failureHandling}</p>
+                                                </div>
+                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
+                                                        <RotateCcw className="w-3 h-3 text-amber-400" /> Lifecycle & Transitions
+                                                    </h5>
+                                                    <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.lifeCycle || 'Managed dynamically within SparkContext execution boundary.'}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 04. Mathematical Formulas & Solved Numerical Examples (if present) */}
+                                        {(selectedNode.formula || selectedNode.numericalExample) && (
+                                            <div className="space-y-3">
+                                                <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+                                                    <Zap className="w-3.5 h-3.5" /> 04. Mathematical Formula & Calculation Rules
+                                                </h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-amber-500/30 font-mono text-xs">
+                                                    {selectedNode.formula && (
+                                                        <div>
+                                                            <h5 className="text-amber-400 font-bold uppercase text-[11px] mb-1">Calculation Formula</h5>
+                                                            <div className="text-slate-200 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
+                                                                {selectedNode.formula}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {selectedNode.numericalExample && (
+                                                        <div>
+                                                            <h5 className="text-amber-400 font-bold uppercase text-[11px] mb-1">Solved Numerical Example</h5>
+                                                            <div className="text-slate-300 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
+                                                                {selectedNode.numericalExample}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 05. Production Best Practices & Anti-Patterns */}
+                                        <div className="space-y-3">
+                                            <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+                                                <ShieldAlert className="w-3.5 h-3.5" /> 05. Production Best Practices & Anti-Patterns
+                                            </h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-xl">
+                                                    <h5 className="text-xs font-mono uppercase text-emerald-400 font-bold mb-1 flex items-center gap-1.5">
+                                                        <CheckCircle className="w-4 h-4" /> Production Best Practice
+                                                    </h5>
+                                                    <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.productionBestPractices}</p>
+                                                </div>
+                                                <div className="bg-rose-950/20 border border-rose-500/30 p-4 rounded-xl">
+                                                    <h5 className="text-xs font-mono uppercase text-rose-400 font-bold mb-1 flex items-center gap-1.5">
+                                                        <AlertTriangle className="w-4 h-4" /> Common Anti-Pattern / Misconception
+                                                    </h5>
+                                                    <p className="text-xs text-slate-300 leading-relaxed">
+                                                        <span className="text-rose-300 font-medium">Mistake:</span> {selectedNode.commonMistakes}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* 06. Key Architectural Takeaways & Targeted Interview Questions */}
+                                        <div className="space-y-4">
+                                            <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+                                                <HelpCircle className="w-3.5 h-3.5" /> 06. Key Architectural Takeaways & Interview Prep
+                                            </h4>
+
+                                            {selectedNode.keyTakeaways && selectedNode.keyTakeaways.length > 0 && (
+                                                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold mb-2 flex items-center gap-1.5">
+                                                        <CheckCircle className="w-4 h-4 text-amber-400" /> Key Architectural Takeaways
+                                                    </h5>
+                                                    <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
+                                                        {selectedNode.keyTakeaways.map((kt, i) => (
+                                                            <li key={i} className="flex items-start gap-2 bg-slate-900 p-2.5 rounded border border-slate-800/80">
+                                                                <span className="text-amber-400 font-bold">•</span>
+                                                                <span>{kt}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+
+                                            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
+                                                <h5 className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold mb-2 flex items-center gap-1.5">
+                                                    <HelpCircle className="w-4 h-4 text-amber-400" /> Targeted Interview Questions for {selectedNode.name}
+                                                </h5>
+                                                <ul className="space-y-1 text-xs text-slate-300">
+                                                    {selectedNode.interviewQuestions.map((q, i) => (
+                                                        <li key={i} className="flex items-start gap-2">
+                                                            <span className="text-amber-500 font-mono">Q{i+1}:</span>
+                                                            <span>{q}</span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
                                 )}
