@@ -2250,14 +2250,14 @@
                             <div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] font-mono uppercase tracking-widest px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
-                                        02. Internal Execution Flowchart
+                                        6. Internal Workflow
                                     </span>
                                     <span className="text-xs text-slate-400 font-mono hidden md:inline">
                                         {steps.length} Sequential Execution Phases
                                     </span>
                                 </div>
                                 <h3 className="text-base font-bold text-white mt-1 flex items-center gap-2">
-                                    Execution Workflow Sequence — {nodeName}
+                                    6. Internal Execution Workflow — {nodeName}
                                 </h3>
                             </div>
                         </div>
@@ -2898,24 +2898,24 @@
                                             </div>
                                         </div>
 
-                                        {/* 01. Overview & Mental Model */}
+                                        {/* 1, 2, 3, 4, 5: Overview & Mental Model */}
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                             <div className="md:col-span-2 bg-slate-950/60 p-4 rounded-xl border border-slate-800 space-y-3">
                                                 <div>
                                                     <h4 className="text-xs uppercase font-mono tracking-wider text-amber-400 mb-1 flex items-center gap-1.5 font-bold">
-                                                        <Info className="w-3.5 h-3.5" /> 01. Academic Definition & Overview
+                                                        <Info className="w-3.5 h-3.5" /> 1. Academic Definition & Overview
                                                     </h4>
                                                     <p className="text-sm text-slate-200 leading-relaxed font-medium">{selectedNode.definition || selectedNode.overview}</p>
                                                 </div>
                                                 {selectedNode.simpleExplanation && (
                                                     <div className="pt-2 border-t border-slate-800/80">
-                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">Simple English Explanation</h5>
+                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">2. Simple English Explanation</h5>
                                                         <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.simpleExplanation}</p>
                                                     </div>
                                                 )}
                                                 {selectedNode.whyExists && (
                                                     <div className="pt-2 border-t border-slate-800/80">
-                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">Why It Exists</h5>
+                                                        <h5 className="text-[11px] font-mono text-amber-300/90 font-bold uppercase mb-0.5">3. Why It Exists</h5>
                                                         <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.whyExists}</p>
                                                     </div>
                                                 )}
@@ -2923,26 +2923,53 @@
                                             <div className="bg-gradient-to-br from-slate-950 to-slate-900 p-4 rounded-xl border border-amber-500/20 space-y-3">
                                                 <div>
                                                     <h4 className="text-xs uppercase font-mono tracking-wider text-amber-400 mb-1 flex items-center gap-1.5 font-bold">
-                                                        <Zap className="w-3.5 h-3.5" /> Real-World Mental Model
+                                                        <Zap className="w-3.5 h-3.5" /> 4. Real-World Mental Model
                                                     </h4>
                                                     <p className="text-xs text-slate-300 italic leading-relaxed">{selectedNode.analogy}</p>
                                                 </div>
                                                 {selectedNode.industryUseCase && (
                                                     <div className="pt-2 border-t border-slate-800">
-                                                        <h5 className="text-[11px] font-mono text-emerald-400 font-bold uppercase mb-0.5">Real Industry Use Case</h5>
+                                                        <h5 className="text-[11px] font-mono text-emerald-400 font-bold uppercase mb-0.5">5. Real Industry Use Case</h5>
                                                         <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.industryUseCase}</p>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        {/* 02. Internal Execution Workflow (Full Width Featured Section) */}
+                                        {/* 6. Internal Execution Workflow (Placed BEFORE 7 and 8!) */}
                                         <WorkflowVisualizer workflowStr={selectedNode.internalWorkflow} nodeName={selectedNode.name} />
 
-                                        {/* 03. Core Technical Specifications (6 Uniform Cards Grid) */}
+                                        {/* 7 & 8. Mathematical Formula & Solved Numerical Example (Placed AFTER 6!) */}
+                                        {(selectedNode.formula || selectedNode.numericalExample) && (
+                                            <div className="space-y-3">
+                                                <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
+                                                    <Zap className="w-3.5 h-3.5" /> 7 & 8. Mathematical Formula & Calculation Rules
+                                                </h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-amber-500/30 font-mono text-xs">
+                                                    {selectedNode.formula && (
+                                                        <div>
+                                                            <h5 className="text-amber-400 font-bold uppercase text-[11px] mb-1">7. Mathematical Formula / Calculation Rule</h5>
+                                                            <div className="text-slate-200 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
+                                                                {selectedNode.formula}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    {selectedNode.numericalExample && (
+                                                        <div>
+                                                            <h5 className="text-amber-400 font-bold uppercase text-[11px] mb-1">8. Solved Numerical Example</h5>
+                                                            <div className="text-slate-300 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
+                                                                {selectedNode.numericalExample}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 9. Deep Architecture Specifications */}
                                         <div className="space-y-3">
                                             <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
-                                                <Layers className="w-3.5 h-3.5" /> 03. Deep Architecture Specifications
+                                                <Layers className="w-3.5 h-3.5" /> 9. Deep Architecture Specifications
                                             </h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                                 <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
@@ -2990,55 +3017,28 @@
                                                 </div>
                                                 <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
                                                     <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
-                                                        <RotateCcw className="w-3 h-3 text-amber-400" /> Lifecycle & Transitions
+                                                        <RotateCcw className="w-3 h-3 text-amber-400" /> Lifecycle & State Transitions
                                                     </h5>
                                                     <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.lifeCycle || 'Managed dynamically within SparkContext execution boundary.'}</p>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        {/* 04. Mathematical Formulas & Solved Numerical Examples (if present) */}
-                                        {(selectedNode.formula || selectedNode.numericalExample) && (
-                                            <div className="space-y-3">
-                                                <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
-                                                    <Zap className="w-3.5 h-3.5" /> 04. Mathematical Formula & Calculation Rules
-                                                </h4>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-950 p-4 rounded-xl border border-amber-500/30 font-mono text-xs">
-                                                    {selectedNode.formula && (
-                                                        <div>
-                                                            <h5 className="text-amber-400 font-bold uppercase text-[11px] mb-1">Calculation Formula</h5>
-                                                            <div className="text-slate-200 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
-                                                                {selectedNode.formula}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                    {selectedNode.numericalExample && (
-                                                        <div>
-                                                            <h5 className="text-amber-400 font-bold uppercase text-[11px] mb-1">Solved Numerical Example</h5>
-                                                            <div className="text-slate-300 bg-slate-900/80 p-2.5 rounded border border-slate-800 leading-relaxed whitespace-pre-wrap">
-                                                                {selectedNode.numericalExample}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* 05. Production Best Practices & Anti-Patterns */}
+                                        {/* 10 & 11. Production Best Practices & Anti-Patterns */}
                                         <div className="space-y-3">
                                             <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
-                                                <ShieldAlert className="w-3.5 h-3.5" /> 05. Production Best Practices & Anti-Patterns
+                                                <ShieldAlert className="w-3.5 h-3.5" /> 10 & 11. Production Best Practices & Anti-Patterns
                                             </h4>
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div className="bg-emerald-950/20 border border-emerald-500/30 p-4 rounded-xl">
                                                     <h5 className="text-xs font-mono uppercase text-emerald-400 font-bold mb-1 flex items-center gap-1.5">
-                                                        <CheckCircle className="w-4 h-4" /> Production Best Practice
+                                                        <CheckCircle className="w-4 h-4" /> 10. Production Best Practice
                                                     </h5>
                                                     <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.productionBestPractices}</p>
                                                 </div>
                                                 <div className="bg-rose-950/20 border border-rose-500/30 p-4 rounded-xl">
                                                     <h5 className="text-xs font-mono uppercase text-rose-400 font-bold mb-1 flex items-center gap-1.5">
-                                                        <AlertTriangle className="w-4 h-4" /> Common Anti-Pattern / Misconception
+                                                        <AlertTriangle className="w-4 h-4" /> 11. Common Anti-Pattern / Misconception
                                                     </h5>
                                                     <p className="text-xs text-slate-300 leading-relaxed">
                                                         <span className="text-rose-300 font-medium">Mistake:</span> {selectedNode.commonMistakes}
@@ -3047,16 +3047,16 @@
                                             </div>
                                         </div>
 
-                                        {/* 06. Key Architectural Takeaways & Targeted Interview Questions */}
+                                        {/* 12 & 13. Key Architectural Takeaways & Targeted Interview Questions */}
                                         <div className="space-y-4">
                                             <h4 className="text-xs font-mono uppercase tracking-wider text-amber-400 font-bold flex items-center gap-1.5">
-                                                <HelpCircle className="w-3.5 h-3.5" /> 06. Key Architectural Takeaways & Interview Prep
+                                                <HelpCircle className="w-3.5 h-3.5" /> 12 & 13. Key Architectural Takeaways & Interview Prep
                                             </h4>
 
                                             {selectedNode.keyTakeaways && selectedNode.keyTakeaways.length > 0 && (
                                                 <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
                                                     <h5 className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold mb-2 flex items-center gap-1.5">
-                                                        <CheckCircle className="w-4 h-4 text-amber-400" /> Key Architectural Takeaways
+                                                        <CheckCircle className="w-4 h-4 text-amber-400" /> 12. Key Architectural Takeaways
                                                     </h5>
                                                     <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
                                                         {selectedNode.keyTakeaways.map((kt, i) => (
@@ -3071,7 +3071,7 @@
 
                                             <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
                                                 <h5 className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold mb-2 flex items-center gap-1.5">
-                                                    <HelpCircle className="w-4 h-4 text-amber-400" /> Targeted Interview Questions for {selectedNode.name}
+                                                    <HelpCircle className="w-4 h-4 text-amber-400" /> 13. Targeted Interview Questions for {selectedNode.name}
                                                 </h5>
                                                 <ul className="space-y-1 text-xs text-slate-300">
                                                     {selectedNode.interviewQuestions.map((q, i) => (
