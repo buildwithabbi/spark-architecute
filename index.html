@@ -2422,6 +2422,96 @@
             );
         };
 
+        // Visual component for rendering Component Lifecycle & State Transitions
+        const LifecycleVisualizer = ({ lifeCycleStr, nodeName }) => {
+            if (!lifeCycleStr) return null;
+
+            let rawSteps = [];
+            if (lifeCycleStr.includes('->')) {
+                rawSteps = lifeCycleStr.split(/\s*->\s*/);
+            } else if (lifeCycleStr.includes(';')) {
+                rawSteps = lifeCycleStr.split(/\s*;\s*/);
+            } else if (lifeCycleStr.includes(',')) {
+                rawSteps = lifeCycleStr.split(/\s*,\s*/);
+            } else {
+                rawSteps = [lifeCycleStr];
+            }
+
+            const steps = rawSteps.map(s => s.trim().replace(/\.$/, '')).filter(s => s.length > 0);
+
+            const getStageStyle = (stepText, idx, total) => {
+                const lower = stepText.toLowerCase();
+                if (idx === 0 || lower.includes('start') || lower.includes('launch') || lower.includes('create') || lower.includes('init') || lower.includes('invocation')) {
+                    return {
+                        bg: 'bg-emerald-950/40 hover:bg-emerald-950/70',
+                        border: 'border-emerald-500/40',
+                        badge: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+                        dot: 'bg-emerald-400 shadow-emerald-500/50',
+                        tag: 'INITIALIZATION'
+                    };
+                }
+                if (idx === total - 1 || lower.includes('stop') || lower.includes('destroy') || lower.includes('teardown') || lower.includes('terminate') || lower.includes('shutdown') || lower.includes('preemption')) {
+                    return {
+                        bg: 'bg-rose-950/40 hover:bg-rose-950/70',
+                        border: 'border-rose-500/40',
+                        badge: 'bg-rose-500/20 text-rose-300 border-rose-500/30',
+                        dot: 'bg-rose-400 shadow-rose-500/50',
+                        tag: 'TERMINATION'
+                    };
+                }
+                return {
+                    bg: 'bg-amber-950/30 hover:bg-amber-950/60',
+                    border: 'border-amber-500/30',
+                    badge: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+                    dot: 'bg-amber-400 shadow-amber-500/50',
+                    tag: 'ACTIVE STATE'
+                };
+            };
+
+            return (
+                <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+                        <div className="flex items-center gap-2">
+                            <div className="p-1 rounded bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                <RotateCcw className="w-3.5 h-3.5" />
+                            </div>
+                            <h5 className="text-xs font-mono uppercase tracking-wider text-amber-300 font-bold">
+                                Visual State Transition Graph — {nodeName}
+                            </h5>
+                        </div>
+                        <span className="text-[10px] font-mono text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                            {steps.length} Sequential Phase{steps.length > 1 ? 's' : ''}
+                        </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {steps.map((step, idx) => {
+                            const style = getStageStyle(step, idx, steps.length);
+                            return (
+                                <div key={idx} className={`relative p-3 rounded-lg border ${style.bg} ${style.border} flex flex-col justify-between space-y-2 transition-all duration-200 hover:-translate-y-0.5 shadow-md`}>
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-[9px] font-mono text-slate-400 font-bold tracking-wider">PHASE {String(idx + 1).padStart(2, '0')}</span>
+                                        <span className={`text-[8px] font-mono uppercase font-bold px-1.5 py-0.5 rounded border ${style.badge}`}>
+                                            {style.tag}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-start gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${style.dot} mt-1 flex-shrink-0 shadow-sm`}></span>
+                                        <p className="text-xs text-slate-200 font-medium leading-relaxed">{step}</p>
+                                    </div>
+                                    {idx < steps.length - 1 && (
+                                        <div className="hidden lg:block absolute -right-2.5 top-1/2 -translate-y-1/2 z-10 text-amber-400 font-bold text-xs pointer-events-none drop-shadow">
+                                            ➔
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            );
+        };
+
         // ================================================================
         // MAIN APP COMPONENT
         // ================================================================
@@ -3015,11 +3105,8 @@
                                                     </h5>
                                                     <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.failureHandling}</p>
                                                 </div>
-                                                <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
-                                                    <h5 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold flex items-center gap-1.5">
-                                                        <RotateCcw className="w-3 h-3 text-amber-400" /> Lifecycle & State Transitions
-                                                    </h5>
-                                                    <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.lifeCycle || 'Managed dynamically within SparkContext execution boundary.'}</p>
+                                                <div className="md:col-span-2 lg:col-span-3">
+                                                    <LifecycleVisualizer lifeCycleStr={selectedNode.lifeCycle} nodeName={selectedNode.name} />
                                                 </div>
                                             </div>
                                         </div>
