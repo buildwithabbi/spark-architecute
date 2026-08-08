@@ -8,6 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js" crossorigin></script>
     <style>
+        /* ... (your existing Tailwind CSS) ... */
         html,
         body {
             margin: 0;
@@ -1478,6 +1479,7 @@
 
         // ================================================================
         // COMPREHENSIVE ARCHITECTURAL COMPONENTS DATASET
+        // (same as before, omitted for brevity)
         // ================================================================
         const ARCHITECTURE_NODES = [{
             id: 'spark-app',
@@ -1971,7 +1973,7 @@
         }];
 
         // ================================================================
-        // QUERY EXECUTION STEPS
+        // QUERY EXECUTION STEPS (unchanged)
         // ================================================================
         const QUERY_EXECUTION_STEPS = [{
             step: 1,
@@ -2056,7 +2058,7 @@
         }];
 
         // ================================================================
-        // INTERNAL OBJECTS CATALOG
+        // INTERNAL OBJECTS CATALOG (unchanged)
         // ================================================================
         const INTERNAL_OBJECTS = [
             { name: 'SparkSession', category: 'Control', description: 'Unified interface for DataFrame and SQL processing. Encapsulates SparkContext, SessionState, and Catalog.' },
@@ -2075,7 +2077,7 @@
         ];
 
         // ================================================================
-        // DEBUGGING SCENARIOS
+        // DEBUGGING SCENARIOS (unchanged)
         // ================================================================
         const DEBUG_SCENARIOS = [{
             id: 'driver-oom',
@@ -2126,7 +2128,7 @@
         }];
 
         // ================================================================
-        // INTERVIEW QUESTIONS
+        // INTERVIEW QUESTIONS (unchanged)
         // ================================================================
         const INTERVIEW_QUESTIONS = [{
             id: 'q1',
@@ -2225,6 +2227,66 @@
                 setExpandedAnswers(prev => ({ ...prev, [id]: !prev[id] }));
             };
 
+            // Helper to render workflow steps from a string like "A -> B -> C"
+            const renderWorkflow = (workflowStr) => {
+                if (!workflowStr) return null;
+                // Split by "->" or "->" with optional spaces
+                const steps = workflowStr.split(/\s*->\s*/).filter(s => s.trim().length > 0);
+                if (steps.length === 0) return <p className="text-xs text-slate-300">{workflowStr}</p>;
+                return (
+                    <div className="flex flex-col space-y-1.5">
+                        {steps.map((step, idx) => (
+                            <div key={idx} className="flex items-start gap-2">
+                                <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-mono font-bold flex items-center justify-center border border-amber-500/30">
+                                    {idx + 1}
+                                </span>
+                                <span className="text-xs text-slate-300 leading-relaxed">{step.trim()}</span>
+                                {idx < steps.length - 1 && (
+                                    <span className="text-amber-500/50 text-xs mx-1">→</span>
+                                )}
+                            </div>
+                        ))}
+                    </div>
+                );
+            };
+
+            // Helper to render communication protocols as a list of interactions
+            const renderCommunication = (commStr) => {
+                if (!commStr) return null;
+                // Split by "," or "." but keep context; we'll split by "), " or "), " 
+                // but simpler: split by ", " and then by "(" to separate source-target
+                const parts = commStr.split(/,\s*/).filter(p => p.trim().length > 0);
+                if (parts.length === 0) return <p className="text-xs text-slate-300">{commStr}</p>;
+                return (
+                    <ul className="space-y-1.5 text-xs text-slate-300">
+                        {parts.map((part, idx) => {
+                            // Try to extract source and target: "Driver <-> Executors (RPC ...)"
+                            const match = part.match(/(.+?)\s*<->\s*(.+?)\s*\((.+)\)/);
+                            if (match) {
+                                return (
+                                    <li key={idx} className="flex items-start gap-2">
+                                        <span className="text-amber-400 font-mono">↔</span>
+                                        <div>
+                                            <span className="font-semibold text-slate-200">{match[1].trim()}</span>
+                                            <span className="text-slate-500"> ⟷ </span>
+                                            <span className="font-semibold text-slate-200">{match[2].trim()}</span>
+                                            <span className="text-slate-400"> ({match[3].trim()})</span>
+                                        </div>
+                                    </li>
+                                );
+                            }
+                            // fallback: just display as text
+                            return (
+                                <li key={idx} className="flex items-start gap-2">
+                                    <span className="text-slate-500">•</span>
+                                    <span>{part.trim()}</span>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                );
+            };
+
             return (
                 <div className="min-h-screen bg-slate-950 text-slate-100 font-sans flex flex-col selection:bg-amber-500 selection:text-slate-950">
 
@@ -2285,7 +2347,7 @@
                     {/* MAIN CONTENT */}
                     <main className="flex-1 p-4 lg:p-8 max-w-7xl mx-auto w-full space-y-8">
 
-                        {/* ===== TAB 0: FOUNDATIONS ===== */}
+                        {/* ===== TAB 0: FOUNDATIONS ===== (unchanged) */}
                         {activeTab === 'foundations' && (
                             <div className="space-y-6">
                                 <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 rounded-xl p-5">
@@ -2660,7 +2722,7 @@
                                             </div>
                                             <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
                                                 <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">6. Internal Workflow</h4>
-                                                <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.internalWorkflow}</p>
+                                                {renderWorkflow(selectedNode.internalWorkflow)}
                                             </div>
                                             <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
                                                 <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Inputs & Outputs</h4>
@@ -2671,7 +2733,7 @@
                                             </div>
                                             <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
                                                 <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Communication Protocols</h4>
-                                                <p className="text-xs text-slate-300 leading-relaxed">{selectedNode.communication}</p>
+                                                {renderCommunication(selectedNode.communication)}
                                             </div>
                                             <div className="bg-slate-950/40 p-4 rounded-xl border border-slate-800">
                                                 <h4 className="text-xs font-mono uppercase tracking-wider text-slate-300 mb-2 font-semibold">Thread & Memory Footprint</h4>
@@ -2737,7 +2799,7 @@
                             </div>
                         )}
 
-                        {/* ===== TAB 2: QUERY SIM ===== */}
+                        {/* ===== TAB 2: QUERY SIM ===== (unchanged) */}
                         {activeTab === 'query-sim' && (
                             <div className="space-y-6">
                                 <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -2873,7 +2935,7 @@
                             </div>
                         )}
 
-                        {/* ===== TAB 3: MEMORY ===== */}
+                        {/* ===== TAB 3: MEMORY ===== (unchanged) */}
                         {activeTab === 'memory' && (
                             <div className="space-y-6">
                                 <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
@@ -3027,7 +3089,7 @@
                             </div>
                         )}
 
-                        {/* ===== TAB 4: SPARK UI ===== */}
+                        {/* ===== TAB 4: SPARK UI ===== (unchanged) */}
                         {activeTab === 'spark-ui' && (
                             <div className="space-y-6">
                                 <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
@@ -3205,7 +3267,7 @@
                             </div>
                         )}
 
-                        {/* ===== TAB 5: DEBUG ===== */}
+                        {/* ===== TAB 5: DEBUG ===== (unchanged) */}
                         {activeTab === 'debug' && (
                             <div className="space-y-6">
                                 <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5">
@@ -3273,7 +3335,7 @@
                             </div>
                         )}
 
-                        {/* ===== TAB 6: INTERVIEW ===== */}
+                        {/* ===== TAB 6: INTERVIEW ===== (unchanged) */}
                         {activeTab === 'interview' && (
                             <div className="space-y-6">
                                 <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
